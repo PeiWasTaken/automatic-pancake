@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTrack - Your Nutrition Calculator</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FFC107;
+            --dark: #212121;
+            --light: #F5F5F5;
+            --danger: #F44336;
+            --card-bg: rgba(255, 255, 255, 0.85);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+        }
+        
+        .search-section h2,
+        .results-section h2 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+        }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        #food-search {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+        }
+        
+        #search-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        #search-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .food-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .food-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .food-item:hover {
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .food-item button {
+            background: var(--secondary);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .food-item button:hover {
+            background: #FFD54F;
+            transform: translateY(-2px);
+        }
+        
+        .nutrition-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .nutrition-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .nutrition-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .nutrition-card h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .nutrition-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+        
+        .selected-foods {
+            margin: 20px 0;
+        }
+        
+        .selected-food-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .remove-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .clear-all {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .clear-all:hover {
+            background: #D32F2F;
+        }
+        
+        /* Chart styles */
+        .chart-container {
+            height: 200px;
+            margin-top: 20px;
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 100%;
+            gap: 20px;
+            padding: 0 10px;
+        }
+        
+        .bar {
+            flex: 1;
+            background: var(--primary);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: height 0.5s;
+            min-height: 5px;
+        }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        
+        .bar:nth-child(1) {
+            background: #FF5722;
+        }
+        
+        .bar:nth-child(2) {
+            background: #2196F3;
+        }
+        
+        .bar:nth-child(3) {
+            background: #FFC107;
+        }
+        
+        .bar:nth-child(4) {
+            background: #4CAF50;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NutriTrack</h1>
+            <p>Track your nutrition with our simple calculator</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Left Column: Search and food list -->
+            <div class="card search-section">
+                <h2>Find Foods</h2>
+                <div class="search-container">
+                    <input type="text" id="food-search" placeholder="Search for a food...">
+                    <button id="search-btn">Search</button>
+                </div>
+                
+                <div class="food-list" id="food-list">
+                    <!-- Food search results will appear here -->
+                </div>
+            </div>
+            
+            <!-- Right Column: Nutrition summary -->
+            <div class="card results-section">
+                <h2>Your Nutrition Summary</h2>
+                
+                <div class="nutrition-summary">
+                    <div class="nutrition-card">
+                        <h3>Calories</h3>
+                        <div class="value" id="total-calories">0</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>Protein</h3>
+                        <div class="value" id="total-protein">0g</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>Carbs</h3>
+                        <div class="value" id="total-carbs">0g</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>Fat</h3>
+                        <div class="value" id="total-fat">0g</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>Fiber</h3>
+                        <div class="value" id="total-fiber">0g</div>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>Sugar</h3>
+                        <div class="value" id="total-sugar">0g</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="bar-chart" id="nutrition-chart">
+                        <div class="bar" id="protein-bar" style="height: 5%;">
+                            <div class="bar-value">0g</div>
+                            <div class="bar-label">Protein</div>
+                        </div>
+                        <div class="bar" id="carbs-bar" style="height: 5%;">
+                            <div class="bar-value">0g</div>
+                            <div class="bar-label">Carbs</div>
+                        </div>
+                        <div class="bar" id="fat-bar" style="height: 5%;">
+                            <div class="bar-value">0g</div>
+                            <div class="bar-label">Fat</div>
+                        </div>
+                        <div class="bar" id="fiber-bar" style="height: 5%;">
+                            <div class="bar-value">0g</div>
+                            <div class="bar-label">Fiber</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 40px; margin-bottom: 10px;">Selected Foods</h3>
+                <div class="selected-foods" id="selected-foods">
+                    <!-- Selected foods will appear here -->
+                    <p id="no-foods-message">No foods selected yet.</p>
+                </div>
+                
+                <button class="clear-all" id="clear-all">Clear All Foods</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Food database with nutritional information
+        const foodDatabase = [
+            { 
+                name: "Apple", 
+                calories: 95, 
+                protein: 0.5, 
+                carbs: 25, 
+                fat: 0.3, 
+                fiber: 4.4, 
+                sugar: 19 
+            },
+            { 
+                name: "Banana", 
+                calories: 105, 
+                protein: 1.3, 
+                carbs: 27, 
+                fat: 0.4, 
+                fiber: 3.1, 
+                sugar: 14 
+            },
+            { 
+                name: "Chicken Breast (100g)", 
+                calories: 165, 
+                protein: 31, 
+                carbs: 0, 
+                fat: 3.6, 
+                fiber: 0, 
+                sugar: 0 
+            },
+            { 
+                name: "Salmon (100g)", 
+                calories: 208, 
+                protein: 20, 
+                carbs: 0, 
+                fat: 13, 
+                fiber: 0, 
+                sugar: 0 
+            },
+            { 
+                name: "Brown Rice (100g cooked)", 
+                calories: 112, 
+                protein: 2.6, 
+                carbs: 24, 
+                fat: 0.9, 
+                fiber: 1.8, 
+                sugar: 0.4 
+            },
+            { 
+                name: "Egg", 
+                calories: 78, 
+                protein: 6.3, 
+                carbs: 0.6, 
+                fat: 5.3, 
+                fiber: 0, 
+                sugar: 0.6 
+            },
+            { 
+                name: "Avocado (half)", 
+                calories: 161, 
+                protein: 2, 
+                carbs: 8.5, 
+                fat: 15, 
+                fiber: 6.7, 
+                sugar: 0.7 
+            },
+            { 
+                name: "Greek Yogurt (100g)", 
+                calories: 59, 
+                protein: 10, 
+                carbs: 3.6, 
+                fat: 0.4, 
+                fiber: 0, 
+                sugar: 3.6 
+            },
+            { 
+                name: "Broccoli (100g)", 
+                calories: 34, 
+                protein: 2.8, 
+                carbs: 6.6, 
+                fat: 0.4, 
+                fiber: 2.6, 
+                sugar: 1.7 
+            },
+            { 
+                name: "Oatmeal (100g cooked)", 
+                calories: 71, 
+                protein: 2.5, 
+                carbs: 12, 
+                fat: 1.5, 
+                fiber: 2, 
+                sugar: 0.5 
+            },
+            { 
+                name: "Beef Steak (100g)", 
+                calories: 271, 
+                protein: 26, 
+                carbs: 0, 
+                fat: 19, 
+                fiber: 0, 
+                sugar: 0 
+            },
+            { 
+                name: "Sweet Potato (medium)", 
+                calories: 112, 
+                protein: 2, 
+                carbs: 26, 
+                fat: 0.1, 
+                fiber: 3.8, 
+                sugar: 5.4 
+            }
+        ];
+        
+        // Selected foods array
+        let selectedFoods = [];
+        
+        // DOM elements
+        const foodSearchInput = document.getElementById('food-search');
+        const searchBtn = document.getElementById('search-btn');
+        const foodListContainer = document.getElementById('food-list');
+        const selectedFoodsContainer = document.getElementById('selected-foods');
+        const noFoodsMessage = document.getElementById('no-foods-message');
+        const clearAllBtn = document.getElementById('clear-all');
+        
+        // Nutrition totals
+        const totalCalories = document.getElementById('total-calories');
+        const totalProtein = document.getElementById('total-protein');
+        const totalCarbs = document.getElementById('total-carbs');
+        const totalFat = document.getElementById('total-fat');
+        const totalFiber = document.getElementById('total-fiber');
+        const totalSugar = document.getElementById('total-sugar');
+        
+        // Chart bars
+        const proteinBar = document.getElementById('protein-bar');
+        const carbsBar = document.getElementById('carbs-bar');
+        const fatBar = document.getElementById('fat-bar');
+        const fiberBar = document.getElementById('fiber-bar');
+        
+        // Search functionality
+        searchBtn.addEventListener('click', searchFoods);
+        foodSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchFoods();
+            }
+        });
+        
+        function searchFoods() {
+            const searchTerm = foodSearchInput.value.toLowerCase();
+            
+            // Clear previous results
+            foodListContainer.innerHTML = '';
+            
+            // Filter foods
+            const filteredFoods = foodDatabase.filter(food => 
+                food.name.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredFoods.length === 0) {
+                foodListContainer.innerHTML = '<p>No foods found. Try a different search.</p>';
+                return;
+            }
+            
+            // Display results
+            filteredFoods.forEach(food => {
+                const foodItem = document.createElement('div');
+                foodItem.className = 'food-item';
+                foodItem.innerHTML = `
+                    <div>${food.name} (${food.calories} kcal)</div>
+                    <button class="add-btn">Add</button>
+                `;
+                
+                foodItem.querySelector('.add-btn').addEventListener('click', () => {
+                    addFood(food);
+                });
+                
+                foodListContainer.appendChild(foodItem);
+            });
+        }
+        
+        // Add food to selected foods
+        function addFood(food) {
+            selectedFoods.push(food);
+            updateSelectedFoodsDisplay();
+            updateNutritionTotals();
+            updateCharts();
+        }
+        
+        // Remove food from selected foods
+        function removeFood(index) {
+            selectedFoods.splice(index, 1);
+            updateSelectedFoodsDisplay();
+            updateNutritionTotals();
+            updateCharts();
+        }
+        
+        // Update selected foods display
+        function updateSelectedFoodsDisplay() {
+            if (selectedFoods.length === 0) {
+                noFoodsMessage.style.display = 'block';
+                selectedFoodsContainer.innerHTML = '';
+                selectedFoodsContainer.appendChild(noFoodsMessage);
+                return;
+            }
+            
+            noFoodsMessage.style.display = 'none';
+            selectedFoodsContainer.innerHTML = '';
+            
+            selectedFoods.forEach((food, index) => {
+                const foodItem = document.createElement('div');
+                foodItem.className = 'selected-food-item';
+                foodItem.innerHTML = `
+                    <div>${food.name} (${food.calories} kcal)</div>
+                    <button class="remove-btn">Remove</button>
+                `;
+                
+                foodItem.querySelector('.remove-btn').addEventListener('click', () => {
+                    removeFood(index);
+                });
+                
+                selectedFoodsContainer.appendChild(foodItem);
+            });
+        }
+        
+        // Update nutrition totals
+        function updateNutritionTotals() {
+            const totals = selectedFoods.reduce((acc, food) => {
+                acc.calories += food.calories;
+                acc.protein += food.protein;
+                acc.carbs += food.carbs;
+                acc.fat += food.fat;
+                acc.fiber += food.fiber;
+                acc.sugar += food.sugar;
+                return acc;
+            }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 });
+            
+            // Update the UI with rounded values
+            totalCalories.textContent = Math.round(totals.calories);
+            totalProtein.textContent = Math.round(totals.protein * 10) / 10 + 'g';
+            totalCarbs.textContent = Math.round(totals.carbs * 10) / 10 + 'g';
+            totalFat.textContent = Math.round(totals.fat * 10) / 10 + 'g';
+            totalFiber.textContent = Math.round(totals.fiber * 10) / 10 + 'g';
+            totalSugar.textContent = Math.round(totals.sugar * 10) / 10 + 'g';
+        }
+        
+        // Update charts
+        function updateCharts() {
+            const totals = selectedFoods.reduce((acc, food) => {
+                acc.protein += food.protein;
+                acc.carbs += food.carbs;
+                acc.fat += food.fat;
+                acc.fiber += food.fiber;
+                return acc;
+            }, { protein: 0, carbs: 0, fat: 0, fiber: 0 });
+            
+            // Calculate maximum value for scaling
+            const maxValue = Math.max(totals.protein, totals.carbs, totals.fat, totals.fiber);
+            
+            // Set bar heights - minimum 5% height for visibility even when zero
+            const proteinHeight = maxValue > 0 ? (totals.protein / maxValue) * 100 : 5;
+            const carbsHeight = maxValue > 0 ? (totals.carbs / maxValue) * 100 : 5;
+            const fatHeight = maxValue > 0 ? (totals.fat / maxValue) * 100 : 5;
+            const fiberHeight = maxValue > 0 ? (totals.fiber / maxValue) * 100 : 5;
+            
+            proteinBar.style.height = `${Math.max(5, proteinHeight)}%`;
+            carbsBar.style.height = Math.max(5, carbsHeight) + '%';
+            fatBar.style.height = `${Math.max(5, fatHeight)}%`;
+            fiberBar.style.height = `${Math.max(5, fiberHeight)}%`;
+            
+            // Update bar values
+            proteinBar.querySelector('.bar-value').textContent = 
+                Math.round(totals.protein * 10) / 10 + 'g';
+            carbsBar.querySelector('.bar-value').textContent = 
+                Math.round(totals.carbs * 10) / 10 + 'g';
+            fatBar.querySelector('.bar-value').textContent = 
+                Math.round(totals.fat * 10) / 10 + 'g';
+            fiberBar.querySelector('.bar-value').textContent = 
+                Math.round(totals.fiber * 10) / 10 + 'g';
+        }
+        
+        // Clear all selected foods
+        clearAllBtn.addEventListener('click', () => {
+            selectedFoods = [];
+            updateSelectedFoodsDisplay();
+            updateNutritionTotals();
+            updateCharts();
+        });
+        
+        // Initialize the app with sample foods for demonstration
+        window.addEventListener('load', () => {
+            // Populate the search results initially with all foods
+            foodDatabase.forEach(food => {
+                const foodItem = document.createElement('div');
+                foodItem.className = 'food-item';
+                foodItem.innerHTML = `
+                    <div>${food.name} (${food.calories} kcal)</div>
+                    <button class="add-btn">Add</button>
+                `;
+                
+                foodItem.querySelector('.add-btn').addEventListener('click', () => {
+                    addFood(food);
+                });
+                
+                foodListContainer.appendChild(foodItem);
+            });
+        });
+    </script>
+</body>
+</html>
